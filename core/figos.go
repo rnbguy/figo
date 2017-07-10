@@ -83,7 +83,7 @@ func Figos(name string, nick string) {
 	if listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port)); err != nil {
 		panic(err)
 	} else {
-		quit = make(chan bool, 1)
+		quit = make(chan bool)
 		start = make(chan bool, 1)
 		if fi, err := os.Stat(file_path); err != nil || !fi.Mode().IsRegular() {
 			fmt.Println("Not valid file")
@@ -95,7 +95,7 @@ func Figos(name string, nick string) {
 		go http.Serve(listener, nil)
 
 		{
-			timer := time.NewTimer(time.Millisecond * 50)
+			timer := time.NewTimer(time.Second)
 			select {
 			case <-start:
 			case <-timer.C:
