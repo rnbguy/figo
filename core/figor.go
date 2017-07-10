@@ -38,7 +38,6 @@ func LookupZeroconf(id string, entries chan *zeroconf.ServiceEntry, stop chan bo
 
 func Figor(name string, out string) {
 	log.SetOutput(ioutil.Discard)
-	fmt.Printf("searching for %s to save as %s\n", name, out)
 
 	var entry *zeroconf.ServiceEntry
 
@@ -57,7 +56,6 @@ func Figor(name string, out string) {
 					fmt.Println("couldn't find anything!")
 					fmt.Println("figos "+name, "or", "figos <filename> "+name)
 				case entry = <-entries:
-					fmt.Println(entry)
 					timer.Stop()
 					stopLookup <- true
 					loopDone = true
@@ -69,12 +67,10 @@ func Figor(name string, out string) {
 		}
 	}
 
-	fmt.Println(entry)
 	addr := entry.AddrIPv4[0]
 	port := entry.Port
 
 	urlPath := fmt.Sprintf("http://%v.%v.%v.%v:%d/%s", addr[0], addr[1], addr[2], addr[3], port, name)
-	fmt.Println(urlPath)
 	if resp, err := http.Get(urlPath); err != nil {
 		panic(err)
 	} else if resp.StatusCode != 200 {

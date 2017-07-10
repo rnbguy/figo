@@ -64,7 +64,6 @@ func ServeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Figos(name string, nick string) {
-	fmt.Printf("registering for %s with nick %s\n", name, nick)
 	log.SetOutput(ioutil.Discard)
 	if nick == "" {
 		nick = GetNick(4)
