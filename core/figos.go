@@ -1,10 +1,7 @@
-package main
+package core
 
 import (
 	"bufio"
-	"crypto/sha1"
-	"encoding/base64"
-	"flag"
 	"fmt"
 	"github.com/grandcat/zeroconf"
 	"gopkg.in/cheggaaa/pb.v1"
@@ -17,22 +14,21 @@ import (
 	"os"
 	"os/signal"
 	"path"
-	"path/filepath"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
 )
 
 var (
+	start     chan bool
 	quit      chan bool
 	wg        sync.WaitGroup
 	file_path string
 )
 
-func RegisterZeroConf(port int, quit chan bool) {
+func RegisterZeroConf(hash string, port int, quit chan bool) {
 	defer wg.Done()
-	if server, err := zeroconf.Register("Figo", "_workstation._tcp", "local.", port, nil, nil); err != nil {
+	if server, err := zeroconf.Register(hash, "_figo._http._tcp", "local.", port, nil, nil); err != nil {
 		panic(err)
 	} else {
 		<-quit
@@ -44,6 +40,7 @@ func ServeHandler(w http.ResponseWriter, r *http.Request) {
 	if file, err := os.Open(file_path); err != nil {
 		panic(err)
 	} else {
+		start <- true
 		w.Header().Set("Content-Type", "application/octet-stream")
 		var datalen int
 		if stat, err := file.Stat(); err != nil {
@@ -66,39 +63,50 @@ func ServeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
+func Figos(name string, nick string) {
+	fmt.Printf("registering for %s with nick %s\n", name, nick)
 	log.SetOutput(ioutil.Discard)
-	port := 42423
-	zeroconfQuit := make(chan bool)
-	wg.Add(1)
-	defer wg.Wait()
-	flag.Parse()
-	if t := flag.Arg(0); t == "" {
-		fmt.Println("Give a file")
-		os.Exit(1)
-	} else {
-		file_path, _ = filepath.Abs(t)
+	if nick == "" {
+		nick = GetNick(4)
 	}
-	go RegisterZeroConf(port, zeroconfQuit)
+	port := 44234
+	// zeroconfQuit := make(chan bool)
+	file_path = name
+	allowed := []string{path.Base(file_path), nick}
+	allowed_hash := GetHashes(allowed)
+	zeroconfQuits := make([]chan bool, 2)
+	defer wg.Wait()
+	for i, hash := range allowed_hash {
+		wg.Add(1)
+		zeroconfQuits[i] = make(chan bool)
+		go RegisterZeroConf(hash, port, zeroconfQuits[i])
+	}
 	if listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port)); err != nil {
 		panic(err)
 	} else {
-		quit = make(chan bool)
+		quit = make(chan bool, 1)
+		start = make(chan bool, 1)
 		if fi, err := os.Stat(file_path); err != nil || !fi.Mode().IsRegular() {
 			fmt.Println("Not valid file")
 			os.Exit(1)
 		}
 		base_name := url.PathEscape(path.Base(file_path))
-		hasher := sha1.New()
-		hasher.Write([]byte(base_name))
-		hasher.Write([]byte(time.Now().String()))
-		uniq_id := strings.ToUpper(base64.URLEncoding.EncodeToString(hasher.Sum(nil))[:4])
-		fmt.Println("Download using either of")
-		fmt.Println("\tfigor", uniq_id)
-		fmt.Println("\tfigor", base_name)
-		http.HandleFunc(fmt.Sprintf("/%s", uniq_id), ServeHandler)
+		http.HandleFunc(fmt.Sprintf("/%s", nick), ServeHandler)
 		http.HandleFunc(fmt.Sprintf("/%s", url.PathEscape(base_name)), ServeHandler)
 		go http.Serve(listener, nil)
+
+		{
+			timer := time.NewTimer(time.Millisecond * 50)
+			select {
+			case <-start:
+			case <-timer.C:
+				fmt.Println("Download using either of")
+				fmt.Println("\tfigor", nick)
+				fmt.Println("\tfigor", base_name)
+			}
+			timer.Stop()
+		}
+
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 		select {
@@ -106,7 +114,8 @@ func main() {
 		case <-quit:
 		}
 		listener.Close()
-		zeroconfQuit <- true
-		close(zeroconfQuit)
+		for _, quit := range zeroconfQuits {
+			quit <- true
+		}
 	}
 }
