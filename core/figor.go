@@ -90,7 +90,7 @@ func Figor(name string, out string) {
 			resp_buf := bufio.NewReader(resp.Body)
 			of_buf := bufio.NewWriter(of)
 
-			bar := pb.New(datalen).SetUnits(pb.U_BYTES)
+			bar := pb.New(datalen).SetUnits(pb.U_BYTES).Prefix(out)
 			bar.Start()
 			bar_writer := io.MultiWriter(of_buf, bar)
 			io.Copy(bar_writer, resp_buf)
