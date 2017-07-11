@@ -84,7 +84,7 @@ func Figos(name string, nick string) {
 		panic(err)
 	} else {
 		quit = make(chan bool)
-		start = make(chan bool, 1)
+		start = make(chan bool)
 		if fi, err := os.Stat(file_path); err != nil || !fi.Mode().IsRegular() {
 			fmt.Println("Not valid file")
 			os.Exit(1)
@@ -102,6 +102,7 @@ func Figos(name string, nick string) {
 				fmt.Println("Download using either of")
 				fmt.Println("\tfigor", nick)
 				fmt.Println("\tfigor", base_name)
+				<-start
 			}
 			timer.Stop()
 		}
