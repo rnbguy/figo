@@ -48,7 +48,7 @@ func Figor(name string, out string) {
 		go LookupZeroconf(GetHash(name), entries, stopLookup)
 
 		{
-			timer := time.NewTimer(time.Millisecond * 50)
+			timer := time.NewTimer(time.Millisecond * 500)
 			for i := 0; i < 2; i++ {
 				loopDone := false
 				select {
