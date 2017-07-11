@@ -35,10 +35,6 @@ func GetHash(name string) string {
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }
 
-func ZeroconfHandler(zeroconfQuit chan bool) {
-	return
-}
-
 func SafeFilename(name string) string {
 	if _, err := os.Stat(name); err != nil {
 		return name
