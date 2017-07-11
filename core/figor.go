@@ -53,7 +53,6 @@ func Figor(name string, out string) {
 				loopDone := false
 				select {
 				case <-timer.C:
-					fmt.Println("couldn't find anything!")
 					fmt.Println("figos "+name, "or", "figos <filename> "+name)
 				case entry = <-entries:
 					timer.Stop()
