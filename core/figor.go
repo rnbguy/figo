@@ -80,6 +80,7 @@ func Figor(name string, out string) {
 			rgx := regexp.MustCompile("inline; filename=\"(.*)\"")
 			out = rgx.FindStringSubmatch(resp.Header.Get("Content-Disposition"))[1]
 		}
+		out = SafeFilename(out)
 		if of, err := os.Create(out); err != nil {
 			panic(err)
 		} else {

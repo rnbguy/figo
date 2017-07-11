@@ -3,7 +3,11 @@ package core
 import (
 	"crypto/sha1"
 	"encoding/base64"
+	"fmt"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -33,4 +37,20 @@ func GetHash(name string) string {
 
 func ZeroconfHandler(zeroconfQuit chan bool) {
 	return
+}
+
+func SafeFilename(name string) string {
+	if _, err := os.Stat(name); err != nil {
+		return name
+	}
+	ext := filepath.Ext(name)
+	basename := strings.TrimSuffix(name, ext)
+	ix := 1
+	for {
+		name := fmt.Sprintf("%s_%d%s", basename, ix, ext)
+		if _, err := os.Stat(name); err != nil {
+			return name
+		}
+		ix++
+	}
 }
