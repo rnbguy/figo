@@ -95,6 +95,8 @@ func Figor(name string, out string) {
 			bar_writer := io.MultiWriter(of_buf, bar)
 			io.Copy(bar_writer, resp_buf)
 			bar.Finish()
+
+			of_buf.Flush()
 		}
 	}
 }

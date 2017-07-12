@@ -59,6 +59,9 @@ func ServeHandler(w http.ResponseWriter, r *http.Request) {
 		bar_reader := bar.NewProxyReader(file_buf)
 		io.Copy(w_buf, bar_reader)
 		bar.Finish()
+
+		w_buf.Flush()
+
 		quit <- true
 	}
 }
