@@ -3,8 +3,6 @@ package core
 import (
 	"bufio"
 	"fmt"
-	"github.com/grandcat/zeroconf"
-	"gopkg.in/cheggaaa/pb.v1"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,6 +15,9 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/grandcat/zeroconf"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 var (
@@ -40,6 +41,7 @@ func ServeHandler(w http.ResponseWriter, r *http.Request) {
 	if file, err := os.Open(file_path); err != nil {
 		panic(err)
 	} else {
+		defer file.Close()
 		start <- true
 		w.Header().Set("Content-Type", "application/octet-stream")
 		var datalen int
