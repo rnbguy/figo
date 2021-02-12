@@ -1,6 +1,9 @@
 Figo
 ===
 
+_I moved on to Rust-lang. Checkout my similar rust-project: [*rope*](https://github.com/rnbguy/rope)._
+---
+
 A simple, Zeroconf-based, peer to peer file transfer utility where you and your friend are in same local network and can talk to each other.
 
 This app is inspired by [zget](https://github.com/nils-werner/zget) but written in [Golang](https://golang.org).
