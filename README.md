@@ -1,7 +1,9 @@
 Figo
 ===
 
-_I moved on to Rust-lang. Checkout my similar rust-project: [*rope*](https://github.com/rnbguy/rope)._
+|⚠️ _figo_ has moved to Rust. Please try its Rust port: [*rope*](https://github.com/rnbguy/rope) ⚠️|
+|-|
+
 ---
 
 A simple, Zeroconf-based, peer to peer file transfer utility where you and your friend are in same local network and can talk to each other.
